@@ -6,7 +6,6 @@ from ui import UIComponents
 from AnalyzeAddiction import ChartGenerator, AddictionAnalyzer 
 
 class UserInputHandler:
-    
     @staticmethod
     def collect_user_input():
         

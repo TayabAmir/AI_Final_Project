@@ -1,7 +1,6 @@
 from AnalyzeAddiction import AddictionAnalyzer
 from config import Config
 from google import genai
-# utils/pdf_generator.py
 
 from fpdf import FPDF
 import os
@@ -14,8 +13,7 @@ class PDFGenerator:
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Load a Unicode-compatible TTF font
-        font_path = "fonts/DejaVuSans.ttf"  # You must place this file in a "fonts" folder
+        font_path = "fonts/DejaVuSans.ttf" 
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", "", 14)
 
@@ -26,7 +24,6 @@ class PDFGenerator:
         pdf.cell(0, 10, f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=True)
         pdf.ln(10)
 
-        # User Profile
         pdf.set_font("DejaVu", "", 14)
         pdf.cell(0, 10, "User Profile", ln=True)
         pdf.set_font("DejaVu", "", 12)
@@ -34,7 +31,6 @@ class PDFGenerator:
             pdf.cell(0, 8, f"{key.replace('_', ' ')}: {value}", ln=True)
         pdf.ln(5)
 
-        # Prediction
         pdf.set_font("DejaVu", "", 14)
         pdf.cell(0, 10, "Prediction Results", ln=True)
         pdf.set_font("DejaVu", "", 12)
@@ -42,14 +38,12 @@ class PDFGenerator:
         pdf.cell(0, 8, f"Addiction Level: {addiction_level}", ln=True)
         pdf.ln(5)
 
-        # AI Insights
         pdf.set_font("DejaVu", "", 14)
         pdf.cell(0, 10, "AI Personalized Analysis", ln=True)
         pdf.set_font("DejaVu", "", 12)
         for line in ai_response.split("\n"):
             pdf.multi_cell(0, 8, line)
 
-        # Save
         os.makedirs("reports", exist_ok=True)
         file_path = os.path.join("reports", f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf")
         pdf.output(file_path)
@@ -129,8 +123,6 @@ class GeminiAI:
 
             Please provide a helpful, personalized response based on their social media usage profile.
             """
-
-            # Use Gemini Client correctly: wrap text in dict
             response = GeminiAI.client.models.generate_content(
                 model="gemini-1.5-flash",
                 contents=[{"role": "user", "parts": [{"text": prompt_text}]}]
