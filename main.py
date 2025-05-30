@@ -68,16 +68,13 @@ def train_models(X_train, X_test, y_train, y_test):
     for name, model in models.items():
         print(f"\nTraining {name}...")
         
-        # Use scaled data for SVM and KNN, original data for others
         if name in ['SVM', 'KNN']:
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
-            # Cross validation on scaled data
             cv_scores = cross_val_score(model, X_train_scaled, y_train, cv=5, scoring='r2')
         else:
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
-            # Cross validation on original data
             cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='r2')
         
         mse = mean_squared_error(y_test, y_pred)

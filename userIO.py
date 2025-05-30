@@ -2,77 +2,66 @@ import streamlit as st
 from Gemini_integration import GeminiAI
 import os
 import pycountry
+from ui import UIComponents
 from AnalyzeAddiction import ChartGenerator, AddictionAnalyzer 
 
 class UserInputHandler:
-    """Class to handle user input collection"""
     
     @staticmethod
     def collect_user_input():
-        """Collect user input from sidebar"""
-        st.sidebar.header("📋 User Information")
-        st.sidebar.markdown("Please fill in your details below:")
         
         def get_country_list():
             return sorted([country.name for country in pycountry.countries])
         
-        with st.sidebar:
-            age = st.slider("Age", min_value=15, max_value=30, value=20, help="Your current age")
-            
-            gender = st.selectbox("Gender", ["Male", "Female"], help="Select your gender")
-            
-            academic_level = st.selectbox(
-                "Academic Level", 
-                ["High School", "Undergraduate", "Graduate"],
-                help="Your current academic level"
-            )
-            
-            country = st.selectbox(
-                "Country",
-                get_country_list(),
-                help="Your country of residence"
-            )
-            
-            daily_usage = st.slider(
-                "Average Daily Usage (Hours)", 
-                min_value=0.5, max_value=12.0, value=4.0, step=0.5,
-                help="How many hours do you spend on social media daily?"
-            )
-            
-            platform = st.selectbox(
-                "Most Used Platform",
-                ["Instagram", "TikTok", "Facebook", "YouTube", "Twitter", "Snapchat", "LinkedIn", "WhatsApp"],
-                help="Which platform do you use most?"
-            )
-            
-            affects_academic = st.selectbox(
-                "Affects Academic Performance?",
-                ["Yes", "No"],
-                help="Do you feel social media affects your academic performance?"
-            )
-            
-            sleep_hours = st.slider(
-                "Sleep Hours Per Night",
-                min_value=4.0, max_value=10.0, value=7.0, step=0.5,
-                help="How many hours do you sleep per night?"
-            )
-            
-            mental_health = st.slider(
-                "Mental Health Score",
-                min_value=1, max_value=10, value=6,
-                help="Rate your mental health (1=Poor, 10=Excellent)"
-            )
-            
-            conflicts = st.slider(
-                "Conflicts Over Social Media",
-                min_value=0, max_value=5, value=1,
-                help="How often do you have conflicts due to social media use?"
-            )
+        UIComponents.display_section_header("Personal Information")
         
-        # Predict button
-        predict_button = st.sidebar.button("🔮 Predict Addiction Score", type="primary")
+        col1, col2, col3 = st.columns(3)
         
-        # Return user input dictionary
+        with col1:
+            age = st.number_input("Age", min_value=15, max_value=30, value=20, 
+                                help="Your current age")
+            gender = st.selectbox("Gender", ["Male", "Female"], 
+                                help="Select your gender")
+            academic_level = st.selectbox("Academic Level", 
+                                        ["High School", "Undergraduate", "Graduate"],
+                                        help="Your current academic level")
+        
+        with col2:
+            country = st.selectbox("Country", get_country_list(),
+                                 help="Your country of residence")
+            daily_usage = st.number_input("Daily Usage (Hours)", 
+                                        min_value=0.5, max_value=12.0, value=4.0, step=0.5,
+                                        help="Hours spent on social media daily")
+            platform = st.selectbox("Most Used Platform",
+                                   ["Instagram", "TikTok", "Facebook", "YouTube", 
+                                    "Twitter", "Snapchat", "LinkedIn", "WhatsApp"],
+                                   help="Which platform do you use most?")
+        
+        with col3:
+            affects_academic = st.selectbox("Affects Academic Performance?",
+                                          ["Yes", "No"],
+                                          help="Does social media affect your academic performance?")
+            sleep_hours = st.number_input("Sleep Hours Per Night",
+                                        min_value=4.0, max_value=10.0, value=7.0, step=0.5,
+                                        help="How many hours do you sleep per night?")
+            mental_health = st.slider("Mental Health Score",
+                                    min_value=1, max_value=10, value=6,
+                                    help="Rate your mental health (1=Poor, 10=Excellent)")
+        
+        col4, col5, col6 = st.columns(3)
+        
+        with col4:
+            conflicts = st.slider("Conflicts Over Social Media",
+                                min_value=0, max_value=5, value=1,
+                                help="How often do you have conflicts due to social media use?")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+        with col_btn2:
+            predict_button = st.button("Predict Addiction Score", 
+                                     type="primary", 
+                                     use_container_width=True)
+        
         user_input = {
             'Age': age,
             'Gender': gender,
@@ -89,245 +78,195 @@ class UserInputHandler:
         return user_input, predict_button
 
 class ResultsDisplayHandler:
-    """Class to handle results display"""
     
     @staticmethod
     def display_prediction_results(prediction, user_input):
-        """Display prediction results with charts and analysis"""
-        # Get addiction level
         level, emoji, color = AddictionAnalyzer.get_addiction_level(prediction)
-        
-        # Display prediction
-        st.markdown(f"""
-        <div class="prediction-box">
-            <h2>🎯 Prediction Results</h2>
-            <div class="prediction-score">{emoji} {prediction:.1f}/10</div>
-            <h3>Addiction Level: {level}</h3>
-            <p>Based on your social media usage patterns and personal characteristics</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Gauge chart
-        st.plotly_chart(ChartGenerator.create_gauge_chart(prediction), use_container_width=True)
+        UIComponents.display_score(prediction, level, emoji)
+        st.plotly_chart(ChartGenerator.create_gauge_chart(prediction), 
+                       use_container_width=True, config={'displayModeBar': False})
     
-    @staticmethod
     @staticmethod
     def display_ai_analysis(user_input, prediction):
-        """Display AI-powered analysis"""
         st.markdown("---")
-        st.markdown("""
-        <div class="chatbot-header">
-            🤖 AI-Powered Personalized Analysis
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Save to session_state for later use
+        UIComponents.display_section_header("AI-Powered Analysis")
         st.session_state["user_input"] = user_input
         st.session_state["prediction"] = prediction
-
-        # Get AI analysis
-        with st.spinner("🧠 AI is analyzing your profile and generating personalized insights..."):
+        with st.spinner("AI is analyzing your profile..."):
             ai_response, success = GeminiAI.query_gemini_api(user_input, prediction)
-
         if success:
             st.markdown(f"""
-            <div class="gemini-response">
-                <h4>🎯 Personalized AI Analysis:</h4>
-                {ai_response.replace('\n', '<br>')}
+            <div class="ai-section">
+                <div class="ai-header">Personalized Analysis</div>
+                <div class="ai-response">
+                    {ai_response.replace('\n', '<br>')}
+                </div>
             </div>
             """, unsafe_allow_html=True)
-            
-            # Add this after displaying the response
-            report_files = os.listdir("reports")
-            latest_report = sorted(report_files)[-1]
-            report_path = os.path.join("reports", latest_report)
-
-            with open(report_path, "rb") as f:
-                st.download_button(
-                    label="📄 Download Full Report (PDF)",
-                    data=f,
-                    file_name=latest_report,
-                    mime="application/pdf"
-                )
-
-            # Use session values instead of direct args
-            ResultsDisplayHandler.display_follow_up_questions(
-                st.session_state["user_input"],
-                st.session_state["prediction"]
-            )
+            try:
+                report_files = os.listdir("reports")
+                if report_files:
+                    latest_report = sorted(report_files)[-1]
+                    report_path = os.path.join("reports", latest_report)
+                    with open(report_path, "rb") as f:
+                        col_dl1, col_dl2, col_dl3 = st.columns([1, 2, 1])
+                        with col_dl2:
+                            st.download_button(
+                                label="Download Full Report (PDF)",
+                                data=f,
+                                file_name=latest_report,
+                                mime="application/pdf",
+                                use_container_width=True
+                            )
+            except:
+                pass
+            ResultsDisplayHandler.display_follow_up_questions(user_input, prediction)
         else:
-            st.error(f"❌ AI Analysis failed: {ai_response}")
+            st.error(f"AI Analysis failed: {ai_response}")
 
-    
     @staticmethod
     def display_follow_up_questions(user_input, prediction):
-        user_input = st.session_state.get("user_input")
-        prediction = st.session_state.get("prediction")
-
-        if not user_input or prediction is None:
-            st.error("Missing data. Please restart analysis.")
-            st.stop()
-
-        """Display follow-up questions section"""
-        st.markdown("### 💬 Ask Follow-up Questions")
-        
-        # Predefined quick questions
+        UIComponents.display_section_header("Ask Follow-up Questions")
         col_q1, col_q2, col_q3 = st.columns(3)
-        
         with col_q1:
-            if st.button("📚 Academic Impact Help"):
-                with st.spinner("🤔 Thinking..."):
+            if st.button("Academic Impact", use_container_width=True):
+                with st.spinner("Thinking..."):
                     follow_up = "How can I minimize social media's impact on my academic performance?"
                     response, _ = GeminiAI.create_follow_up_query(user_input, prediction, follow_up)
                     st.markdown(f"""
-                    <div class="user-query"><strong>Q:</strong> {follow_up}</div>
-                    <div class="gemini-response"><strong>AI:</strong> {response}</div>
+                    <div class="ai-response" style="margin-top: 1rem;">
+                        <strong>Q:</strong> {follow_up}<br><br>
+                        <strong>AI:</strong> {response}
+                    </div>
                     """, unsafe_allow_html=True)
-        
         with col_q2:
-            if st.button("😴 Sleep & Usage Tips"):
-                with st.spinner("🤔 Thinking..."):
+            if st.button("Sleep & Usage", use_container_width=True):
+                with st.spinner("Thinking..."):
                     follow_up = "How can I improve my sleep while managing social media use?"
                     response, _ = GeminiAI.create_follow_up_query(user_input, prediction, follow_up)
                     st.markdown(f"""
-                    <div class="user-query"><strong>Q:</strong> {follow_up}</div>
-                    <div class="gemini-response"><strong>AI:</strong> {response}</div>
+                    <div class="ai-response" style="margin-top: 1rem;">
+                        <strong>Q:</strong> {follow_up}<br><br>
+                        <strong>AI:</strong> {response}
+                    </div>
                     """, unsafe_allow_html=True)
-        
         with col_q3:
-            if st.button("🧠 Mental Health Support"):
-                with st.spinner("🤔 Thinking..."):
+            if st.button("Mental Health", use_container_width=True):
+                with st.spinner("Thinking..."):
                     follow_up = "What strategies can help improve my mental health related to social media use?"
                     response, _ = GeminiAI.create_follow_up_query(user_input, prediction, follow_up)
                     st.markdown(f"""
-                    <div class="user-query"><strong>Q:</strong> {follow_up}</div>
-                    <div class="gemini-response"><strong>AI:</strong> {response}</div>
+                    <div class="ai-response" style="margin-top: 1rem;">
+                        <strong>Q:</strong> {follow_up}<br><br>
+                        <strong>AI:</strong> {response}
+                    </div>
                     """, unsafe_allow_html=True)
-        
-        # Custom question input
-        st.markdown("#### 💭 Ask Your Own Question")
+        st.markdown("<br>", unsafe_allow_html=True)
         custom_question = st.text_input(
-            "Type your question about social media addiction, habits, or wellness:",
+            "Ask your own question:",
             placeholder="e.g., How can I reduce my TikTok usage?",
             key="custom_q"
         )
-        
-        if st.button("🚀 Ask AI") and custom_question:
-            with st.spinner("🤖 Getting personalized answer..."):
-                custom_response, success = GeminiAI.create_follow_up_query(
-                    user_input, prediction, custom_question
-                )
-                if success:
-                    st.markdown(f"""
-                    <div class="user-query"><strong>Your Question:</strong> {custom_question}</div>
-                    <div class="gemini-response"><strong>AI Response:</strong> {custom_response}</div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.error("❌ Failed to get AI response. Please try again.")
+        col_ask1, col_ask2, col_ask3 = st.columns([1, 2, 1])
+        with col_ask2:
+            if st.button("Ask AI", use_container_width=True) and custom_question:
+                with st.spinner("Getting personalized answer..."):
+                    custom_response, success = GeminiAI.create_follow_up_query(
+                        user_input, prediction, custom_question
+                    )
+                    if success:
+                        st.markdown(f"""
+                        <div class="ai-response" style="margin-top: 1rem;">
+                            <strong>Your Question:</strong> {custom_question}<br><br>
+                            <strong>AI Response:</strong> {custom_response}
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.error("Failed to get AI response. Please try again.")
     
     @staticmethod
     def display_basic_analysis(prediction):
-        """Display basic analysis without AI"""
-        st.markdown("---")
-        st.markdown("### 📊 Basic Analysis")
+        UIComponents.display_section_header("Analysis Summary")
         if prediction <= 3:
-            st.markdown("""
-            <div class="success-box">
-                <h4>✅ Great News!</h4>
-                <p>Your social media usage appears to be well-controlled. You maintain a healthy balance between online and offline activities.</p>
-            </div>
-            """, unsafe_allow_html=True)
+            UIComponents.display_recommendation(
+                "Great News!",
+                "Your social media usage appears to be well-controlled. You maintain a healthy balance between online and offline activities."
+            )
         elif prediction <= 6:
-            st.markdown("""
-            <div class="warning-box">
-                <h4>⚠️ Moderate Usage</h4>
-                <p>Your social media usage is moderate. Consider monitoring your habits to prevent them from becoming problematic.</p>
-            </div>
-            """, unsafe_allow_html=True)
+            UIComponents.display_recommendation(
+                "Moderate Usage",
+                "Your social media usage is moderate. Consider monitoring your habits to prevent them from becoming problematic."
+            )
         else:
-            st.markdown("""
-            <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
-                <h4>🚨 High Usage Detected</h4>
-                <p>Your social media usage patterns suggest potential addiction. Consider seeking support or implementing digital wellness strategies.</p>
-            </div>
-            """, unsafe_allow_html=True)
+            UIComponents.display_recommendation(
+                "High Usage Detected",
+                "Your social media usage patterns suggest potential addiction. Consider seeking support or implementing digital wellness strategies."
+            )
     
     @staticmethod
     def display_user_profile(user_input):
-        """Display user profile summary"""
-        st.markdown("### 📊 Your Profile")
-        
-        profile_data = [
-            ["Age", f"{user_input['Age']} years"],
-            ["Daily Usage", f"{user_input['Avg_Daily_Usage_Hours']} hours"],
-            ["Sleep", f"{user_input['Sleep_Hours_Per_Night']} hours"],
-            ["Mental Health", f"{user_input['Mental_Health_Score']}/10"],
-            ["Platform", user_input['Most_Used_Platform']],
-            ["Academic Impact", user_input['Affects_Academic_Performance']]
-        ]
-        
-        for label, value in profile_data:
-            st.markdown(f"**{label}:** {value}")
-        
-        # Comparison radar chart
-        st.markdown("### 📈 Profile Comparison")
-        user_radar = [
-            user_input['Avg_Daily_Usage_Hours'], 
-            user_input['Sleep_Hours_Per_Night'], 
-            user_input['Mental_Health_Score'], 
-            user_input['Conflicts_Over_Social_Media']
-        ]
-        avg_radar = [4.5, 6.5, 6.5, 2.0]  # Sample averages
-        
-        fig_radar = ChartGenerator.create_comparison_chart(user_radar, avg_radar)
-        st.plotly_chart(fig_radar, use_container_width=True)
+        UIComponents.display_section_header("Your Profile Summary")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            UIComponents.display_metric_card("Age", f"{user_input['Age']} years")
+            UIComponents.display_metric_card("Daily Usage", f"{user_input['Avg_Daily_Usage_Hours']} hours")
+        with col2:
+            UIComponents.display_metric_card("Sleep Hours", f"{user_input['Sleep_Hours_Per_Night']} hours")
+            UIComponents.display_metric_card("Mental Health", f"{user_input['Mental_Health_Score']}/10")
+        with col3:
+            UIComponents.display_metric_card("Platform", user_input['Most_Used_Platform'])
+            UIComponents.display_metric_card("Academic Impact", user_input['Affects_Academic_Performance'])
     
     @staticmethod
     def display_insights_recommendations(user_input, prediction):
-        """Display insights and recommendations"""
-        st.markdown("---")
-        st.markdown("### 💡 Insights & Recommendations")
-        
-        col3, col4, col5 = st.columns(3)
-        
-        with col3:
+        UIComponents.display_section_header("Personalized Recommendations")
+        col1, col2, col3 = st.columns(3)
+        with col1:
             if user_input['Avg_Daily_Usage_Hours'] > 6:
-                st.warning("📱 **High Usage Alert**\nConsider setting daily time limits")
+                UIComponents.display_recommendation(
+                    "Usage Alert",
+                    "Consider setting daily time limits to reduce screen time."
+                )
             else:
-                st.success("📱 **Usage Normal**\nGood control over screen time")
-        
-        with col4:
+                UIComponents.display_recommendation(
+                    "Usage Normal",
+                    "Good control over your screen time. Keep it up!"
+                )
+        with col2:
             if user_input['Sleep_Hours_Per_Night'] < 6:
-                st.warning("😴 **Sleep Concern**\nTry to get 7-8 hours of sleep")
+                UIComponents.display_recommendation(
+                    "Sleep Concern",
+                    "Try to get 7-8 hours of sleep for better health."
+                )
             else:
-                st.success("😴 **Sleep Healthy**\nGood sleep patterns maintained")
-        
-        with col5:
+                UIComponents.display_recommendation(
+                    "Sleep Healthy",
+                    "Good sleep patterns are being maintained."
+                )
+        with col3:
             if user_input['Mental_Health_Score'] < 5:
-                st.warning("🧠 **Mental Health**\nConsider professional support")
+                UIComponents.display_recommendation(
+                    "Mental Health",
+                    "Consider professional support for mental wellness."
+                )
             else:
-                st.success("🧠 **Mental Health**\nPositive mental wellbeing")
-        
-        # Recommendations based on prediction
-        st.markdown("### 🎯 Personalized Recommendations")
+                UIComponents.display_recommendation(
+                    "Mental Health",
+                    "Positive mental wellbeing detected."
+                )
+        st.markdown("<br>", unsafe_allow_html=True)
         if prediction > 7:
-            st.markdown("""
-            - 🕒 Set specific times for social media use
-            - 📵 Use app timers and notifications
-            - 🏃‍♂️ Engage in offline physical activities
-            - 👥 Spend more time with friends and family in person
-            - 📚 Focus on academic/professional goals
-            """)
+            UIComponents.display_recommendation(
+                "High Priority Actions",
+                "• Set specific times for social media use• Use app timers and notifications\n• Engage in offline physical activities\n• Spend more time with friends and family in person\n• Focus on academic/professional goals"
+            )
         elif prediction > 4:
-            st.markdown("""
-            - ⏰ Monitor your daily usage patterns
-            - 🔕 Turn off non-essential notifications
-            - 🌱 Develop new hobbies outside of social media
-            - 💤 Avoid social media before bedtime
-            """)
+            UIComponents.display_recommendation(
+                "Moderate Actions",
+                "• Monitor your daily usage patterns\n• Turn off non-essential notifications\n• Develop new hobbies outside of social media\n• Avoid social media before bedtime"
+            )
         else:
-            st.markdown("""
-            - ✅ Continue your healthy usage patterns
-            - 🎯 Share your strategies with others
-            - 📈 Consider helping friends with social media balance
-            """)
+            UIComponents.display_recommendation(
+                "Keep Going",
+                "• Continue your healthy usage patterns\n• Share your strategies with others\n• Consider helping friends with social media balance"
+            )

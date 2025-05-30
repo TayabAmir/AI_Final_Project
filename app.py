@@ -4,92 +4,122 @@ import warnings
 from config import Config
 from ui import UIComponents
 from modelHandler import ModelHandler
-from userIO import UserInputHandler,ResultsDisplayHandler
+from userIO import UserInputHandler, ResultsDisplayHandler
 warnings.filterwarnings('ignore')
 
 class SocialMediaApp:
-    """Main application class"""
+    """Main application class with clean, modern design"""
     
     def __init__(self):
-        # Configure page
-        st.set_page_config(**Config.PAGE_CONFIG)
+        # Configure page with clean settings
+        st.set_page_config(
+            page_title="Social Media Addiction Predictor",
+            page_icon="📱",
+            layout="wide",
+            initial_sidebar_state="collapsed"
+        )
         
-        # Load UI components
+        # Load clean UI components
         UIComponents.load_custom_css()
         UIComponents.render_header()
         
-        # Load model
+        # Load model with clean status display
         self.model_package = ModelHandler.load_model()
         if self.model_package is None:
             st.stop()
         
-        # Display model info
-        st.success(f"✅ Loaded Model: **{self.model_package['model_name']}**")
-        st.success(f"🤖 AI Assistant: {'✅ Active' if Config.GEMINI_API_KEY != 'YOUR_GEMINI_API_KEY_HERE' else '⚠️ API Key Required'}")
+        # Display clean status indicators
+        col_status1, col_status2 = st.columns(2)
+        with col_status1:
+            st.success(f"✅ Model: **{self.model_package['model_name']}**")
+        with col_status2:
+            ai_status = '✅ Active' if Config.GEMINI_API_KEY != 'YOUR_GEMINI_API_KEY_HERE' else '⚠️ Configure API Key'
+            st.info(f"🤖 AI Assistant: {ai_status}")
     
     def run(self):
-        """Run the main application"""
-        # Collect user input
+        """Run the main application with clean layout"""
+        # Collect user input in clean form
         user_input, predict_button = UserInputHandler.collect_user_input()
 
-        # Main content area
-        col1, col2 = st.columns([2, 1])
+        # Results section
+        if predict_button:
+            # Make prediction
+            with st.spinner("🔄 Analyzing your social media habits..."):
+                prediction = ModelHandler.make_prediction(self.model_package, user_input)
 
-        with col1:
-            if predict_button:
-                # Make prediction
-                with st.spinner("🔄 Analyzing your social media habits..."):
-                    prediction = ModelHandler.make_prediction(self.model_package, user_input)
+            if prediction is not None:
+                # Save to session state
+                st.session_state['prediction'] = prediction
+                st.session_state['user_input'] = user_input
 
-                if prediction is not None:
-                    # Save to session state
-                    st.session_state['prediction'] = prediction
-                    st.session_state['user_input'] = user_input
-
+                # Display results in order
+                st.markdown("---")
+                
+                # Main results layout
+                col_results1, col_results2 = st.columns([2, 1])
+                
+                with col_results1:
                     ResultsDisplayHandler.display_prediction_results(prediction, user_input)
+                
+                with col_results2:
+                    ResultsDisplayHandler.display_user_profile(user_input)
 
-                    if Config.GEMINI_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
-                        ResultsDisplayHandler.display_ai_analysis(user_input, prediction)
-                    else:
-                        st.info("🤖 **AI Analysis Disabled:** Please configure your Gemini API key in the Config class to enable AI insights!")
-
-                    ResultsDisplayHandler.display_basic_analysis(prediction)
-
-            # 👇 Add this fallback for follow-up rerun
-            elif 'user_input' in st.session_state and 'prediction' in st.session_state:
+                # AI Analysis section
                 if Config.GEMINI_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
-                    ResultsDisplayHandler.display_ai_analysis(
-                        st.session_state['user_input'],
-                        st.session_state['prediction']
-                    )
+                    ResultsDisplayHandler.display_ai_analysis(user_input, prediction)
+                else:
+                    st.markdown("---")
+                    UIComponents.display_section_header("🤖 AI Analysis")
+                    st.info("Please configure your Gemini API key to enable AI insights!")
 
-        with col2:
-            if predict_button and 'prediction' in st.session_state:
-                ResultsDisplayHandler.display_user_profile(user_input)
+                # Basic analysis
+                ResultsDisplayHandler.display_basic_analysis(prediction)
+                
+                # Recommendations
+                ResultsDisplayHandler.display_insights_recommendations(user_input, prediction)
 
-        # Display additional recommendations if we have session state
-        if 'user_input' in st.session_state and 'prediction' in st.session_state:
+        # Display previous results if available
+        elif 'user_input' in st.session_state and 'prediction' in st.session_state:
+            st.markdown("---")
+            
+            # Show previous results
+            col_prev1, col_prev2 = st.columns([2, 1])
+            
+            with col_prev1:
+                ResultsDisplayHandler.display_prediction_results(
+                    st.session_state['prediction'], 
+                    st.session_state['user_input']
+                )
+            
+            with col_prev2:
+                ResultsDisplayHandler.display_user_profile(st.session_state['user_input'])
+
+            if Config.GEMINI_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
+                ResultsDisplayHandler.display_ai_analysis(
+                    st.session_state['user_input'],
+                    st.session_state['prediction']
+                )
+
+            ResultsDisplayHandler.display_basic_analysis(st.session_state['prediction'])
             ResultsDisplayHandler.display_insights_recommendations(
                 st.session_state['user_input'],
                 st.session_state['prediction']
             )
 
-        # Footer
+        # Clean footer
         self.render_footer()
 
     def render_footer(self):
-        """Render application footer"""
+        """Render clean application footer"""
         st.markdown("---")
-        col_footer1, col_footer2 = st.columns(2)
-        
-        with col_footer1:
-            st.markdown(f"**Model:** {self.model_package['model_name']} | **Time:** {datetime.now().strftime('%H:%M:%S')}")
-        
-        with col_footer2:
-            if Config.GEMINI_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
-                st.markdown("🤖 **AI Assistant:** ✅ Active")
-            else:
-                st.markdown("🤖 **AI Assistant:** ⚠️ API Key Required")
+        st.markdown(
+            f"<div style='text-align: center; color: #6b7280; padding: 1rem;'>"
+            f"Model: {self.model_package['model_name']} | "
+            f"Time: {datetime.now().strftime('%H:%M:%S')} | "
+            f"AI: {'Active' if Config.GEMINI_API_KEY != 'YOUR_GEMINI_API_KEY_HERE' else 'Inactive'}"
+            f"</div>", 
+            unsafe_allow_html=True
+        )
 
 def main():
     """Main function to run the application"""
