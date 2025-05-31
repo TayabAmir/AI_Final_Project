@@ -8,7 +8,7 @@ google-genai>=0.3.0
 
 python-dotenv>=1.0.0
 pycountry>=22.3.0,<25.0.0
-fpdf>=2.7.0
+fpdf<=1.7.2
 joblib>=1.2.0
 
 setuptools>=65.0.0
