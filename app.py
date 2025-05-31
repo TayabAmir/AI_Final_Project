@@ -11,7 +11,6 @@ class SocialMediaApp:
     """Main application class with clean, modern design"""
     
     def __init__(self):
-        # Configure page with clean settings
         st.set_page_config(
             page_title="Social Media Addiction Predictor",
             page_icon="📱",
@@ -19,16 +18,13 @@ class SocialMediaApp:
             initial_sidebar_state="collapsed"
         )
         
-        # Load clean UI components
         UIComponents.load_custom_css()
         UIComponents.render_header()
         
-        # Load model with clean status display
         self.model_package = ModelHandler.load_model()
         if self.model_package is None:
             st.stop()
         
-        # Display clean status indicators
         col_status1, col_status2 = st.columns(2)
         with col_status1:
             st.success(f"✅ Model: **{self.model_package['model_name']}**")
@@ -38,24 +34,18 @@ class SocialMediaApp:
     
     def run(self):
         """Run the main application with clean layout"""
-        # Collect user input in clean form
         user_input, predict_button = UserInputHandler.collect_user_input()
 
-        # Results section
         if predict_button:
-            # Make prediction
             with st.spinner("🔄 Analyzing your social media habits..."):
                 prediction = ModelHandler.make_prediction(self.model_package, user_input)
 
             if prediction is not None:
-                # Save to session state
                 st.session_state['prediction'] = prediction
                 st.session_state['user_input'] = user_input
 
-                # Display results in order
                 st.markdown("---")
                 
-                # Main results layout
                 col_results1, col_results2 = st.columns([2, 1])
                 
                 with col_results1:
@@ -64,7 +54,6 @@ class SocialMediaApp:
                 with col_results2:
                     ResultsDisplayHandler.display_user_profile(user_input)
 
-                # AI Analysis section
                 if Config.GEMINI_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
                     ResultsDisplayHandler.display_ai_analysis(user_input, prediction)
                 else:
@@ -72,17 +61,13 @@ class SocialMediaApp:
                     UIComponents.display_section_header("🤖 AI Analysis")
                     st.info("Please configure your Gemini API key to enable AI insights!")
 
-                # Basic analysis
                 ResultsDisplayHandler.display_basic_analysis(prediction)
                 
-                # Recommendations
                 ResultsDisplayHandler.display_insights_recommendations(user_input, prediction)
 
-        # Display previous results if available
         elif 'user_input' in st.session_state and 'prediction' in st.session_state:
             st.markdown("---")
             
-            # Show previous results
             col_prev1, col_prev2 = st.columns([2, 1])
             
             with col_prev1:
@@ -106,7 +91,6 @@ class SocialMediaApp:
                 st.session_state['prediction']
             )
 
-        # Clean footer
         self.render_footer()
 
     def render_footer(self):
