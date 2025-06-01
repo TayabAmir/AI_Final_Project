@@ -9,7 +9,12 @@ class UIComponents:
         """Load clean, modern CSS styling"""
         st.markdown("""
         <style>
-    
+            html {
+                color-scheme: light !important;
+                forced-color-adjust: none !important;
+                -webkit-font-smoothing: antialiased;
+                -webkit-text-size-adjust: 100%;
+                }
             /* Remove default Streamlit styling */
             .stApp {
                 background-color: #ffffff;
