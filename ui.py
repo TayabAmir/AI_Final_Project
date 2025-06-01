@@ -1,77 +1,148 @@
 import streamlit as st
 
 class UIComponents:
-    """Class to handle UI styling and components"""
+    """Class to handle UI styling and components with theme support"""
+    
+    @staticmethod
+    def initialize_theme():
+        """Initialize theme state if not already set"""
+        if 'dark_mode' not in st.session_state:
+            st.session_state.dark_mode = False
+    
+    @staticmethod
+    def render_theme_toggle():
+        """Render the theme toggle button in the sidebar"""
+        with st.sidebar:
+            st.markdown("### Settings")
+            current_theme = "🌙 Dark Mode" if not st.session_state.dark_mode else "☀️ Light Mode"
+            if st.button(current_theme, use_container_width=True):
+                st.session_state.dark_mode = not st.session_state.dark_mode
+                st.rerun()
+    
+    @staticmethod
+    def get_theme_colors():
+        """Get color scheme based on current theme"""
+        if st.session_state.dark_mode:
+            return {
+                'bg_primary': '#1a1a1a',
+                'bg_secondary': '#2d2d2d',
+                'bg_tertiary': '#3a3a3a',
+                'text_primary': '#ffffff',
+                'text_secondary': '#e0e0e0',
+                'text_muted': '#a0a0a0',
+                'border': '#4a4a4a',
+                'accent': '#3b82f6',
+                'accent_hover': '#2563eb',
+                'accent_light': '#1e3a8a',
+                'card_bg': '#2d2d2d',
+                'form_bg': '#333333',
+                'recommendation_bg': '#2a2a2a',
+                'ai_section_bg': '#1f2937',
+                'ai_response_bg': '#374151'
+            }
+        else:
+            return {
+                'bg_primary': '#ffffff',
+                'bg_secondary': '#f8f9fa',
+                'bg_tertiary': '#ffffff',
+                'text_primary': '#2c3e50',
+                'text_secondary': '#374151',
+                'text_muted': '#6b7280',
+                'border': '#e8eaed',
+                'accent': '#3b82f6',
+                'accent_hover': '#2563eb',
+                'accent_light': '#1e40af',
+                'card_bg': '#ffffff',
+                'form_bg': '#ffffff',
+                'recommendation_bg': '#f8fafc',
+                'ai_section_bg': '#f0f9ff',
+                'ai_response_bg': '#ffffff'
+            }
     
     @staticmethod
     def load_custom_css():
+        """Load theme-aware CSS styling"""
+        UIComponents.initialize_theme()
+        colors = UIComponents.get_theme_colors()
         
-        """Load clean, modern CSS styling"""
-        st.markdown("""
+        st.markdown(f"""
         <style>
-            @media (prefers-color-scheme: dark) {
-                html, body, .stApp {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    filter: invert(0%) !important;
-                }
-
-                * {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border-color: #e5e7eb !important;
-                }
-
-                img, video {
-                    filter: invert(0%) !important;
-                }
-            }
-
             /* Remove default Streamlit styling */
-            .stApp {
-                background-color: #ffffff;
-            }
+            .stApp {{
+                background-color: {colors['bg_primary']};
+                color: {colors['text_primary']};
+            }}
+            
+            /* Sidebar styling */
+            .css-1d391kg {{
+                background-color: {colors['bg_secondary']};
+            }}
             
             /* Header styling */
-            .main-header {
+            .main-header {{
                 font-size: 2.5rem;
                 font-weight: 600;
-                color: #2c3e50;
+                color: {colors['text_primary']};
                 text-align: center;
                 margin-bottom: 2rem;
                 padding: 1rem 0;
-                border-bottom: 2px solid #ecf0f1;
-            }
+                border-bottom: 2px solid {colors['border']};
+            }}
             
             /* Form container */
-            .form-container {
-                background: #ffffff;
+            .form-container {{
+                background: {colors['form_bg']};
                 padding: 2rem;
                 border-radius: 12px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-                border: 1px solid #e8eaed;
+                border: 1px solid {colors['border']};
                 margin-bottom: 2rem;
-            }
+            }}
             
             /* Input field styling */
-            .stSelectbox > div > div {
+            .stSelectbox > div > div {{
                 border-radius: 8px;
-                border: 1px solid #d1d5db;
-                background-color: #ffffff;
-            }
+                border: 1px solid {colors['border']};
+                background-color: {colors['card_bg']};
+                color: {colors['text_primary']};
+            }}
             
-            .stSlider > div > div {
-                background-color: #f8f9fa;
-            }
+            .stSelectbox label {{
+                color: {colors['text_secondary']} !important;
+            }}
             
-            .stNumberInput > div > div {
+            .stSlider > div > div {{
+                background-color: {colors['bg_secondary']};
+            }}
+            
+            .stSlider label {{
+                color: {colors['text_secondary']} !important;
+            }}
+            
+            .stNumberInput > div > div {{
                 border-radius: 8px;
-                border: 1px solid #d1d5db;
-            }
+                border: 1px solid {colors['border']};
+                background-color: {colors['card_bg']};
+                color: {colors['text_primary']};
+            }}
             
-            /* Button styling - Changed to blue */
-            .predict-button {
-                background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            .stNumberInput label {{
+                color: {colors['text_secondary']} !important;
+            }}
+            
+            .stTextInput > div > div {{
+                background-color: {colors['card_bg']};
+                border: 1px solid {colors['border']};
+                color: {colors['text_primary']};
+            }}
+            
+            .stTextInput label {{
+                color: {colors['text_secondary']} !important;
+            }}
+            
+            /* Button styling */
+            .predict-button {{
+                background: linear-gradient(135deg, {colors['accent']} 0%, {colors['accent_light']} 100%);
                 color: white;
                 padding: 0.75rem 2rem;
                 border: none;
@@ -82,206 +153,269 @@ class UIComponents:
                 width: 100%;
                 margin-top: 1rem;
                 transition: all 0.3s ease;
-            }
+            }}
             
-            .predict-button:hover {
+            .predict-button:hover {{
                 transform: translateY(-2px);
                 box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            }
+                background: linear-gradient(135deg, {colors['accent_hover']} 0%, {colors['accent_light']} 100%);
+            }}
             
             /* Results container */
-            .results-container {
-                background: #ffffff;
+            .results-container {{
+                background: {colors['card_bg']};
                 padding: 2rem;
                 border-radius: 12px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-                border: 1px solid #e8eaed;
+                border: 1px solid {colors['border']};
                 margin: 2rem 0;
-            }
+            }}
             
-            /* Score display - Changed to blue gradient */
-            .score-display {
+            /* Score display */
+            .score-display {{
                 text-align: center;
                 padding: 2rem;
-                background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+                background: linear-gradient(135deg, {colors['accent']} 0%, {colors['accent_light']} 100%);
                 border-radius: 12px;
                 color: white;
                 margin-bottom: 2rem;
-            }
+            }}
             
-            .score-number {
+            .score-number {{
                 font-size: 3rem;
                 font-weight: bold;
                 margin: 1rem 0;
-            }
+            }}
             
-            .score-level {
+            .score-level {{
                 font-size: 1.5rem;
                 font-weight: 600;
-            }
+            }}
             
             /* Clean metric cards */
-            .metric-card {
-                background: #ffffff;
+            .metric-card {{
+                background: {colors['card_bg']};
                 padding: 1.5rem;
                 border-radius: 8px;
-                border: 1px solid #e8eaed;
+                border: 1px solid {colors['border']};
                 margin-bottom: 1rem;
                 text-align: center;
-            }
+            }}
             
-            .metric-title {
+            .metric-title {{
                 font-size: 0.9rem;
-                color: #6b7280;
+                color: {colors['text_muted']};
                 font-weight: 500;
                 margin-bottom: 0.5rem;
-            }
+            }}
             
-            .metric-value {
+            .metric-value {{
                 font-size: 1.5rem;
                 font-weight: 600;
-                color: #374151;
-            }
+                color: {colors['text_secondary']};
+            }}
             
             /* Recommendations */
-            .recommendation-card {
-                background: #f8fafc;
+            .recommendation-card {{
+                background: {colors['recommendation_bg']};
                 padding: 1.5rem;
                 border-radius: 8px;
-                border-left: 4px solid #3b82f6;
+                border-left: 4px solid {colors['accent']};
                 margin-bottom: 1rem;
-            }
+            }}
             
-            .recommendation-title {
+            .recommendation-title {{
                 font-weight: 600;
-                color: #1f2937;
+                color: {colors['text_primary']};
                 margin-bottom: 0.5rem;
-            }
+            }}
             
-            .recommendation-text {
-                color: #4b5563;
+            .recommendation-text {{
+                color: {colors['text_secondary']};
                 line-height: 1.6;
-            }
+            }}
             
             /* AI Analysis section */
-            .ai-section {
-                background: #f0f9ff;
+            .ai-section {{
+                background: {colors['ai_section_bg']};
                 padding: 2rem;
                 border-radius: 12px;
-                border: 1px solid #bfdbfe;
+                border: 1px solid {colors['border']};
                 margin: 2rem 0;
-            }
+            }}
             
-            .ai-header {
-                color: #1e40af;
+            .ai-header {{
+                color: {colors['accent']};
                 font-weight: 600;
                 font-size: 1.2rem;
                 margin-bottom: 1rem;
-            }
+            }}
             
-            .ai-response {
-                background: #ffffff;
+            .ai-response {{
+                background: {colors['ai_response_bg']};
                 padding: 1.5rem;
                 border-radius: 8px;
-                border: 1px solid #e5e7eb;
-                color: #374151;
+                border: 1px solid {colors['border']};
+                color: {colors['text_secondary']};
                 line-height: 1.6;
-            }
+            }}
             
             /* Hide Streamlit branding */
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
+            #MainMenu {{visibility: hidden;}}
+            footer {{visibility: hidden;}}
+            header {{visibility: hidden;}}
             
             /* Clean spacing */
-            .block-container {
+            .block-container {{
                 padding-top: 2rem;
                 padding-bottom: 2rem;
-            }
-            
-            /* Input labels */
-            .stSelectbox label, .stSlider label, .stNumberInput label {
-                font-weight: 500;
-                color: #374151;
-                font-size: 0.95rem;
-            }
+            }}
             
             /* Section headers */
-            .section-header {
+            .section-header {{
                 font-size: 1.3rem;
                 font-weight: 600;
-                color: #1f2937;
+                color: {colors['text_primary']};
                 margin-bottom: 1rem;
                 padding-bottom: 0.5rem;
-                border-bottom: 2px solid #e5e7eb;
-            }
+                border-bottom: 2px solid {colors['border']};
+            }}
 
-            /* Additional Streamlit component styling for blue theme */
-            .stButton > button {
-                background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            /* Streamlit component styling */
+            .stButton > button {{
+                background: linear-gradient(135deg, {colors['accent']} 0%, {colors['accent_light']} 100%);
                 color: white;
                 border: none;
                 border-radius: 8px;
                 padding: 0.75rem 2rem;
                 font-weight: 600;
                 transition: all 0.3s ease;
-            }
+            }}
             
-            .stButton > button:hover {
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            .stButton > button:hover {{
+                background: linear-gradient(135deg, {colors['accent_hover']} 0%, {colors['accent_light']} 100%);
                 transform: translateY(-2px);
                 box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            }
+            }}
             
-            .stButton > button:focus {
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            .stButton > button:focus {{
+                background: linear-gradient(135deg, {colors['accent_hover']} 0%, {colors['accent_light']} 100%);
                 box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-            }
+            }}
             
-            /* Clean Number Input Styling */
-            .stNumberInput button {
+            /* Number Input Styling */
+            .stNumberInput button {{
                 background-color: transparent !important;
-                color: #6b7280 !important;
-                border: 1px solid #d1d5db !important;
+                color: {colors['text_muted']} !important;
+                border: 1px solid {colors['border']} !important;
                 border-radius: 6px !important;
                 transition: all 0.2s ease !important;
-            }
+            }}
             
-            .stNumberInput button:hover {
-                background-color: #3b82f6 !important;
+            .stNumberInput button:hover {{
+                background-color: {colors['accent']} !important;
                 color: white !important;
-                border-color: #3b82f6 !important;
-            }
+                border-color: {colors['accent']} !important;
+            }}
             
-            .stNumberInput button:focus {
-                background-color: #2563eb !important;
+            .stNumberInput button:focus {{
+                background-color: {colors['accent_hover']} !important;
                 color: white !important;
-                border-color: #2563eb !important;
+                border-color: {colors['accent_hover']} !important;
                 outline: none !important;
-            }
+            }}
             
             /* Alternative selectors for number inputs */
-            div[data-testid="stNumberInput"] button {
+            div[data-testid="stNumberInput"] button {{
                 background-color: transparent !important;
-                color: #6b7280 !important;
-                border: 1px solid #d1d5db !important;
+                color: {colors['text_muted']} !important;
+                border: 1px solid {colors['border']} !important;
                 transition: all 0.2s ease !important;
-            }
+            }}
             
-            div[data-testid="stNumberInput"] button:hover {
-                background-color: #3b82f6 !important;
+            div[data-testid="stNumberInput"] button:hover {{
+                background-color: {colors['accent']} !important;
                 color: white !important;
-                border-color: #3b82f6 !important;
-            }
+                border-color: {colors['accent']} !important;
+            }}
             
-            /* Keep sliders with default Streamlit styling */
+            /* Spinner styling */
+            .stSpinner > div {{
+                border-top-color: {colors['accent']} !important;
+            }}
+            
+            /* Download button styling */
+            .stDownloadButton > button {{
+                background: linear-gradient(135deg, {colors['accent']} 0%, {colors['accent_light']} 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 0.75rem 2rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }}
+            
+            .stDownloadButton > button:hover {{
+                background: linear-gradient(135deg, {colors['accent_hover']} 0%, {colors['accent_light']} 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            }}
+            
+            /* Sidebar button styling */
+            .css-1d391kg .stButton > button {{
+                background: linear-gradient(135deg, {colors['accent']} 0%, {colors['accent_light']} 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                width: 100%;
+            }}
+            
+            .css-1d391kg .stButton > button:hover {{
+                background: linear-gradient(135deg, {colors['accent_hover']} 0%, {colors['accent_light']} 100%);
+                transform: translateY(-2px);
+            }}
+            
+            /* Sidebar text styling */
+            .css-1d391kg h3 {{
+                color: {colors['text_primary']} !important;
+            }}
+            
+            /* Error and success message styling */
+            .stError {{
+                background-color: #fee2e2 !important;
+                color: #dc2626 !important;
+                border: 1px solid #fecaca !important;
+            }}
+            
+            .stSuccess {{
+                background-color: #dcfce7 !important;
+                color: #16a34a !important;
+                border: 1px solid #bbf7d0 !important;
+            }}
+            
+            /* Dark mode adjustments for error/success */
+            {f'''
+            .stError {{
+                background-color: #7f1d1d !important;
+                color: #fca5a5 !important;
+                border: 1px solid #991b1b !important;
+            }}
+            
+            .stSuccess {{
+                background-color: #14532d !important;
+                color: #86efac !important;
+                border: 1px solid #166534 !important;
+            }}
+            ''' if st.session_state.dark_mode else ''}
         </style>
         """, unsafe_allow_html=True)
     
     @staticmethod
     def render_header():
-        """Render clean main header"""
+        """Render clean main header with theme toggle"""
+        UIComponents.render_theme_toggle()
         st.markdown('<h1 class="main-header">Social Media Addiction Prediction</h1>', unsafe_allow_html=True)
     
     @staticmethod

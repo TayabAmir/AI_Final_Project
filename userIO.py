@@ -128,7 +128,7 @@ class ResultsDisplayHandler:
         UIComponents.display_section_header("Ask Follow-up Questions")
         col_q1, col_q2, col_q3 = st.columns(3)
         with col_q1:
-            if st.button("Academic Impact", use_container_width=True):
+            if st.button("Academic Impact", use_container_width=True, key="academic_btn"):
                 with st.spinner("Thinking..."):
                     follow_up = "How can I minimize social media's impact on my academic performance?"
                     response, _ = GeminiAI.create_follow_up_query(user_input, prediction, follow_up)
@@ -139,7 +139,7 @@ class ResultsDisplayHandler:
                     </div>
                     """, unsafe_allow_html=True)
         with col_q2:
-            if st.button("Sleep & Usage", use_container_width=True):
+            if st.button("Sleep & Usage", use_container_width=True, key="sleep_btn"):
                 with st.spinner("Thinking..."):
                     follow_up = "How can I improve my sleep while managing social media use?"
                     response, _ = GeminiAI.create_follow_up_query(user_input, prediction, follow_up)
@@ -150,7 +150,7 @@ class ResultsDisplayHandler:
                     </div>
                     """, unsafe_allow_html=True)
         with col_q3:
-            if st.button("Mental Health", use_container_width=True):
+            if st.button("Mental Health", use_container_width=True, key="mental_btn"):
                 with st.spinner("Thinking..."):
                     follow_up = "What strategies can help improve my mental health related to social media use?"
                     response, _ = GeminiAI.create_follow_up_query(user_input, prediction, follow_up)
@@ -168,7 +168,7 @@ class ResultsDisplayHandler:
         )
         col_ask1, col_ask2, col_ask3 = st.columns([1, 2, 1])
         with col_ask2:
-            if st.button("Ask AI", use_container_width=True) and custom_question:
+            if st.button("Ask AI", use_container_width=True, key="ask_ai_btn") and custom_question:
                 with st.spinner("Getting personalized answer..."):
                     custom_response, success = GeminiAI.create_follow_up_query(
                         user_input, prediction, custom_question
