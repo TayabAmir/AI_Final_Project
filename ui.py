@@ -9,12 +9,24 @@ class UIComponents:
         """Load clean, modern CSS styling"""
         st.markdown("""
         <style>
-            html {
-                color-scheme: light !important;
-                forced-color-adjust: none !important;
-                -webkit-font-smoothing: antialiased;
-                -webkit-text-size-adjust: 100%;
+            @media (prefers-color-scheme: dark) {
+                html, body, .stApp {
+                    background-color: #ffffff !important;
+                    color: #000000 !important;
+                    filter: invert(0%) !important;
                 }
+
+                * {
+                    background-color: #ffffff !important;
+                    color: #000000 !important;
+                    border-color: #e5e7eb !important;
+                }
+
+                img, video {
+                    filter: invert(0%) !important;
+                }
+            }
+
             /* Remove default Streamlit styling */
             .stApp {
                 background-color: #ffffff;
